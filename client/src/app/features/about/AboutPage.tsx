@@ -1,5 +1,5 @@
 import { PropaneSharp } from "@mui/icons-material";
-import { Alert, AlertTitle, Button, ButtonGroup, Container, ListItem, ListItemText, Typography } from "@mui/material";
+import { Alert, AlertTitle, Button, ButtonGroup, Container, List, ListItem, ListItemText, Typography } from "@mui/material";
 import { BrowserHistory } from "history";
 import { useState } from "react";
 import { BrowserRouterProps, useLocation } from "react-router-dom";
@@ -31,14 +31,15 @@ export default function AboutPage({history}:props){
       {validationErrors.length > 0 &&
         <Alert severity='error'>
           <AlertTitle>Validation Errors</AlertTitle>
+          <List>
             {validationErrors.map(error =>(
               <ListItem key={error}>
                 <ListItemText>{error}</ListItemText>
               </ListItem>
             ))}
-
-        </Alert> }
-
+          </List>
+        </Alert> 
+      }
     </Container>  
     )
 }

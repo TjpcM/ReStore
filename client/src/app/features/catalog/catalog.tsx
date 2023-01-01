@@ -19,7 +19,8 @@ const sortOptions =[
   //export default function Catalog(props:Props) {
 export default function Catalog() {
  const products = useAppSelector(productSelector.selectAll);//
- const {productsLoaded,filtersLoaded, brands, types, productParams,metaData} = useAppSelector(state => state.catalog);
+ const {productsLoaded,status} = useAppSelector(state => state.catalog);
+ const {filtersLoaded, brands, types, productParams,metaData} = useAppSelector(state => state.catalog);
  const dispatch =  useAppDispatch();
 
  // const [loading, setLoading]= useState(true);
@@ -28,12 +29,14 @@ export default function Catalog() {
     if (!productsLoaded) dispatch(fetchProductsAsync());
    },[productsLoaded,dispatch]);
 
+  //if(status.includes('pending')) return <LoadingComponent message='Loading products....' />
+
 useEffect(() =>{
   if (!filtersLoaded) dispatch(fetchFiltersAsync());
 
 },[dispatch,filtersLoaded]);
 
-if(!filtersLoaded) return <LoadingComponent message='Loading products...'/>;
+if(!filtersLoaded) return <LoadingComponent message='Loading products.a..'/>;
 
         return (
       <Grid container columnSpacing={4}>

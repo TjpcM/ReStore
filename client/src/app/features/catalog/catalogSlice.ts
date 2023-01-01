@@ -6,7 +6,7 @@ import { RootState } from "../../store/configureStore";
 
 interface CatalogState {
     productsLoaded:boolean;
-    filtersLoaded:Boolean;
+    filtersLoaded:boolean;
     status:string;
     brands:string[];
     types:string[];
@@ -54,7 +54,7 @@ export const fetchProductAsync = createAsyncThunk<Product,number>(
     async (productId, thunkAPI) => {
       try {
           return await agent.Catalog.details(productId);
-      } catch (error) {
+      } catch (error:any) {
         //error got is of type 'any'
           return thunkAPI.rejectWithValue({error})       
       }
@@ -121,7 +121,7 @@ export const catalogSlice = createSlice({
             state.productsLoaded=true;
         });
         builder.addCase(fetchProductsAsync.rejected,(state,action)=>{
-            console.log(action.payload);
+      //      console.log(action.payload);
             state.status='idle';
         });
         builder.addCase(fetchProductAsync.pending,(state) =>{
@@ -146,7 +146,7 @@ export const catalogSlice = createSlice({
         });
         builder.addCase(fetchFiltersAsync.rejected, (state,action)=>{
             state.status='idle';
-            console.log(action.payload);
+        //    console.log(action.payload);
         })
     })
 });

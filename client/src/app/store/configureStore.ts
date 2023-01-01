@@ -1,6 +1,6 @@
-import { useSelect } from "@mui/base";
 import { configureStore } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { accountSlice } from "../features/account/accountSlice";
 import { basketSlice } from "../features/Basket/basketSlice";
 import { catalogSlice } from "../features/catalog/catalogSlice";
 import { counterSlice } from "../features/contact/counterSlice";
@@ -10,7 +10,8 @@ import { counterSlice } from "../features/contact/counterSlice";
     reducer:{
         counter:counterSlice.reducer,
         basket: basketSlice.reducer,
-        catalog:catalogSlice.reducer
+        catalog:catalogSlice.reducer,
+        account:accountSlice.reducer
     }
  })
 

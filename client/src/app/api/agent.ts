@@ -1,7 +1,9 @@
-import axios, { AxiosError, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
+import { config } from "process";
 import { toast } from "react-toastify";
 import { history } from "../..";
 import { PaginatedResponse } from "../models/pagination";
+import { store } from "../store/configureStore";
 
 const sleep = () => new Promise(resolve => setTimeout(resolve, 500))
 
@@ -9,16 +11,27 @@ axios.defaults.baseURL ='http://localhost:5000/api/'; // base url
 axios.defaults.withCredentials=true;
 const reponseBody =(response:AxiosResponse) => response.data;
 
+axios.interceptors.request.use((config) => {
+    const token = store.getState().account.user?.token;
+    if (token && typeof config.headers != 'undefined') config.headers.Authorization = `Bearer ${token}`;
+    return config;
+})
+
 axios.interceptors.response.use(async response => {
-    await sleep();
+    //await sleep();
+     await sleep();
     const pagination = response.headers['pagination']; //'pagination' in lower cases
     if (pagination){
         response.data = new PaginatedResponse(response.data, JSON.parse(pagination));
         return response;
     }
     return response;
-}, (error:AxiosError<any,number>) => {
-    const {data,status} = error.response!;
+}, (error) => {
+    const {data} = error.response!;
+     
+     const {status} =  data;
+     console.log(data);
+
     // ! override type safety here;// ! override type safety here
   
    // if (typeof data === 'object' && data !== null){
@@ -32,9 +45,9 @@ axios.interceptors.response.use(async response => {
                 if (data.errors[key]){
                     modelStateErrors.push(data.errors[key]);
                 }
+              }
+              throw modelStateErrors.flat();
             }
-           throw modelStateErrors.flat();
-        }
             toast.error(data.title);
             break;
         case 401:
@@ -54,10 +67,11 @@ axios.interceptors.response.use(async response => {
        // });
 
          history.push({
-           pathname :"/server-error"}, 
-        {error:{...data}} 
-                     );
+           pathname :'/server-error'}, 
+        {error:data}
+        );
         
+        console.log(history.location)
           break;
                             
         default:
@@ -66,7 +80,6 @@ axios.interceptors.response.use(async response => {
 
     return Promise.reject(error.response);
 })
-
 
 const requests = {
     get: (url: string, params?:URLSearchParams) => axios.get(url, {params}).then(reponseBody),//axios.get can take a config, thal allows to a params object
@@ -90,15 +103,22 @@ const TestErrors = {
  }
 
  const Basket ={
-    get:() => requests.get('Basket'),
-    addItem:(productId:number, quantity = 1) => requests.post(`Basket?productId=${productId}&quantity=${quantity}`,{}),
-    removeItem:(productId:number, quantity = 1) => requests.delete(`Basket?productId=${productId}&quantity=${quantity}`)
+    get:() => requests.get('basket'),
+    addItem:(productId:number, quantity = 1) => requests.post(`basket?productId=${productId}&quantity=${quantity}`,{}),
+    removeItem:(productId:number, quantity = 1) => requests.delete(`basket?productId=${productId}&quantity=${quantity}`)
+ }
+
+ const Account ={
+    login: (values:any) => requests.post('account/login',values),
+    register: (values:any) => requests.post('account/register',values),
+    currentUser: () => requests.get('account/currentUser')
  }
 
 const agent = {
     Catalog,
     TestErrors,
-    Basket
+    Basket,
+    Account
 }
 
 

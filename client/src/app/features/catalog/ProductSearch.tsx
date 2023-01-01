@@ -17,11 +17,8 @@ export default function ProductSearch() {
         label='Search products'
         variant ='outlined'
         fullWidth
-        value={searchTerm || ''}
-        onChange={(event:any) => {
-            setSearchTerm(event.target.value);
-            debouncedSearch(event);
-        }}
+        value={productParams.searchTerm || ''}
+        onChange={ event => dispatch(setProductParams({searchTerm:event.target.value}))}
       />
     )
 }

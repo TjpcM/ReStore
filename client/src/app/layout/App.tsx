@@ -1,11 +1,10 @@
 import { ThemeProvider } from "@emotion/react";
 import { createTheme, CssBaseline } from "@mui/material";
 import { Container } from "@mui/system";
-import {  useEffect, useState } from "react";
+import {  useCallback, useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import AboutPage from "../features/about/AboutPage";
-import Catalog from "../features/catalog/catalog";
 import ProductDetais from "../features/catalog/ProductDetails";
 import ContactPage from "../features/contact/ContactPage";
 import HomePage from "../features/home/HomePage";
@@ -15,31 +14,35 @@ import ServerError from "../errors/ServerError";
 import NotFound from "../errors/NotFound";
 import { history } from "../..";
 import BasketPage from "../features/Basket/BasketPage";
-import { getCookie } from "../api/Util/util";
-import agent from "../api/agent";
 import LoadingComponent from "./LoadingComponent";
-import CheckoutPage from "../features/checkout/CheckoutPage";
-import { setBasket } from "../features/Basket/basketSlice";
+import { fetchBasketAsync } from "../features/Basket/basketSlice";
 import { useAppDispatch } from "../store/configureStore";
+import Login from "../features/account/login";
+import Register from "../features/account/register";
+import { fetchCurrentUser } from "../features/account/accountSlice";
+import Catalog from "../features/catalog/Catalog";
+import PrivateRoute from "./PrivateRoute";
 
 
-function App() {
+
+function App(){
   //const {setBasket} = useStoreContext(); 
-const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const buyerId = getCookie('buyerId');
-    if (buyerId){
-      agent.Basket.get()
-            .then(basket => dispatch(setBasket(basket)))
-            .catch(error => console.log(error))
-            .finally(() => setLoading(false));
+  //useCallback will return a memorized version of the callback that only changes if one of the inputs has changed.
+ const initApp = useCallback(async () =>{
+  try {
+    await dispatch(fetchCurrentUser());
+    await dispatch(fetchBasketAsync());
+  } catch (error:any) {
+    console.log({error:error.data});
+  }
+},[dispatch] )
 
-    }else{
-      setLoading(false);
-    }
-  },[setBasket]);
+  useEffect(() => {
+    initApp().then(() => setLoading(false));
+  },[initApp]);
 
 const [darkMode, setDarkMode] =useState(false);
 const paletteType = darkMode ? 'dark' :'light';
@@ -63,7 +66,7 @@ const paletteType = darkMode ? 'dark' :'light';
        <CssBaseline/>
         <Header darkMode={darkMode} handleThemeChange={handleThemeChange} />
         <Container >
-          <Routes>           
+          <Routes >           
              <Route  path='*'           element={<NotFound/>} />   
              <Route path='/'  element={<HomePage/>}/>
              <Route path='/catalog' element={<Catalog/>} />
@@ -72,7 +75,10 @@ const paletteType = darkMode ? 'dark' :'light';
              <Route path='/contact' element={<ContactPage/>} />
              <Route path='/server-error'  element={<ServerError history={history} /> }   />
              <Route path='/basket'  element={<BasketPage  /> }   />
-             <Route path ='/checkout' element={<CheckoutPage />}/>
+             <Route path='/checkout' element={<PrivateRoute location={history.location}/>} />
+
+             <Route path = '/login' element ={<Login/>} />
+             <Route path ='/register' element ={<Register />} />
           </Routes>
         </Container>
    
